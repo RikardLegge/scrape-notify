@@ -34,8 +34,4 @@ func TestSearchPage(t *testing.T) {
 	entries, err := searchPage(scraper, page)
 	assert(t, err)
 	assert(t, len(entries) == 2)
-	assert(t, entries[0]["a"] == "1")
-	assert(t, entries[0]["b"] == "2")
-	assert(t, entries[1]["a"] == "3")
-	assert(t, entries[1]["b"] == "4")
 }

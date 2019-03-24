@@ -82,7 +82,7 @@ func hasSent(body string) bool {
 		return false
 	}
 	cache := string(cacheData)
-	return strings.Contains(body, cache)
+	return strings.Contains(cache, body)
 }
 
 func scrape(ex Scraper) ([]string, error) {
@@ -90,19 +90,7 @@ func scrape(ex Scraper) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	pairList, err := searchPage(ex, html)
-	if err != nil {
-		return nil, err
-	}
-	var results []string
-	for _, pair := range pairList {
-		var messages []string
-		for key, val := range pair {
-			messages = append(messages, key+": "+val)
-		}
-		results = append(results, strings.Join(messages, "\n"))
-	}
-	return results, nil
+	return searchPage(ex, html)
 }
 
 func loadToken() (string, error) {
@@ -115,7 +103,7 @@ func loadToken() (string, error) {
 	return "", fmt.Errorf("PUSHBULLET_TOKEN not found in the environment")
 }
 
-func searchPage(ex Scraper, html string) ([]map[string]string, error) {
+func searchPage(ex Scraper, html string) ([]string, error) {
 	value := ex.value
 	keys := ex.keys
 	regex := ""
@@ -130,17 +118,17 @@ func searchPage(ex Scraper, html string) ([]map[string]string, error) {
 	trimRE := regexp.MustCompile("\\s+")
 
 	groups := extractRE.FindAllStringSubmatch(html, -1)
-	hits := make([]map[string]string, 0)
+	results := make([]string, 0)
 	for _, values := range groups {
-		pairs := make(map[string]string, 0)
+		messages := make([]string, 0)
 		for i, key := range keys {
 			value := string(trimRE.ReplaceAll([]byte(values[i+1]), []byte(" ")))
 			value = strings.TrimSpace(value)
-			pairs[key] = value
+			messages = append(messages, key+": "+value)
 		}
-		hits = append(hits, pairs)
+		results = append(results, strings.Join(messages, "\n"))
 	}
-	return hits, nil
+	return results, nil
 }
 
 func fetchWebsite(url string) (string, error) {
